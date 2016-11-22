@@ -8,7 +8,7 @@ X(1,:) = X0;
 dt = (t1-X0(1))/N;
 
 for ii=2:N
-    X(ii,:) = X(ii-1,:) + stochDE(X(ii-1,:),1).*dt + stochDE(X(ii-1,:),2).*normrnd(0,dt);
+    X(ii,:) = X(ii-1,:) + stochDE(X(ii-1,:),1).*dt + stochDE(X(ii-1,:),2).*normrnd(0,sqrt(dt));
 end
 
 sol = X;
