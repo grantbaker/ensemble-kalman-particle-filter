@@ -1,7 +1,8 @@
-x = EulerMaruyama(@GBWB, [0,1,0,1], 10, 10000);
+x = EulerMaruyama(@GBWB, [0,1,0,2], 100, 100000);
 figure
+subplot(2,2,1);
 plot(x(:,1),x(:,2));
-figure
+subplot(2,2,2);
 plot(x(:,1),x(:,3));
-figure
+subplot(2,2,3);
 plot(x(:,1),x(:,4));
