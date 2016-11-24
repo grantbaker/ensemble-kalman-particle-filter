@@ -1,4 +1,4 @@
-x = EulerMaruyama(@GBWB, [0,1,0,2], 100, 100000);
+x = EulerMaruyama(@GBWB, [0,0.2,0,0], 10, 100000);
 figure
 subplot(2,2,1);
 plot(x(:,1),x(:,2));

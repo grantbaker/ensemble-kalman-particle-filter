@@ -1,4 +1,4 @@
-function [ dX ] = brownian(Xt, stoch )
+function [ dX ] = brownian(~, stoch )
 %BROWNIAN brownian motion
 
 if (stoch==1)
