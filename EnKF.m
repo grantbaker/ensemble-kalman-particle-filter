@@ -8,7 +8,7 @@ t0 = 0;
 tf = 10;
 Nt = 10000;
 NO = 1;
-Nens = 10;
+Nens = 100;
 obsVar = 0.0001;
 
 dt = (tf-t0)/Nt;
