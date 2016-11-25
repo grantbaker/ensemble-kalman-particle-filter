@@ -8,8 +8,8 @@ t0 = 0;
 tf = 10;
 Nt = 10000;
 NO = 1;
-Nens = 100;
-obsVar = 0.0001;
+Nens = 10;
+obsVar = 0.1;
 
 dt = (tf-t0)/Nt;
 tSpace = linspace(t0,tf,Nt);
@@ -29,8 +29,12 @@ for ii=2:Nt
     end
     if (mod(ii,NO)==0)
         Obs(ii,:) = trueSol(ii,:) + normrnd(0,sqrt(obsVar));
-        mu = (1/Nens)*sum(X(ii,:,:),3);
-        A = reshape(X(ii,:,:),3,Nens) - mu';
+        mu = (1/Nens)*sum(X(ii,:,:),d);
+        %A = reshape(X(ii,:,:),d,Nens)- mu';
+        A = reshape(X(ii,:,:),d,Nens);
+        for jj=1:Nens
+            A(:,jj) = A(:,jj)-mu';
+        end
         C = (A*A')/(Nens-1);
         K = C * (C + obsVar*eye(d))^-1;
         for jj=1:Nens
