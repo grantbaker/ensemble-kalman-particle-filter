@@ -6,10 +6,10 @@ ic = [0.2,0,0];
 d = size(ic,2);
 t0 = 0;
 tf = 10;
-Nt = 10000;
-NO = 1;
-Nens = 10;
-obsVar = 0.1;
+Nt = 100000;
+NO = 1000;
+Nens = 100;
+obsVar = 0.05;
 
 dt = (tf-t0)/Nt;
 tSpace = linspace(t0,tf,Nt);
@@ -23,12 +23,14 @@ for ii=1:Nens
 end
 
 for ii=2:Nt
+    %disp(ii/Nt);
     for jj=1:Nens
         tmp = EulerMaruyama(@GBWB,X(ii-1,:,jj),[tSpace(ii-1),tSpace(ii)]);
         X(ii,:,jj) = tmp(2,:);
     end
     if (mod(ii,NO)==0)
-        Obs(ii,:) = trueSol(ii,:) + normrnd(0,sqrt(obsVar));
+        disp(ii/Nt);
+	Obs(ii,:) = trueSol(ii,:) + normrnd(0,sqrt(obsVar));
         mu = (1/Nens)*sum(X(ii,:,:),d);
         %A = reshape(X(ii,:,:),d,Nens)- mu';
         A = reshape(X(ii,:,:),d,Nens);
