@@ -6,10 +6,10 @@ ic = [0.2,0,0];
 d = size(ic,2);
 t0 = 0;
 tf = 10;
-Nt = 100000;
-NO = 1000;
-Nens = 100;
-obsVar = 0.05;
+Nt = 10000;
+NO = 50;
+Nens = 20;
+obsVar = 0.5;
 
 dt = (tf-t0)/Nt;
 tSpace = linspace(t0,tf,Nt);
