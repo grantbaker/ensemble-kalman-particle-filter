@@ -8,9 +8,9 @@ mu = 1.5;
 sigma = 6;
 
 if (stoch==1)
-    dX = [1,theta*(mu-Xt(2))];
+    dX = theta*(mu-Xt);
 else
-    dX = [0,sigma];
+    dX = sigma;
 end
 
 

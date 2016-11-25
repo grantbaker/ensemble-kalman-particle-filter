@@ -2,9 +2,9 @@ function [ dX ] = brownian(~, stoch )
 %BROWNIAN brownian motion
 
 if (stoch==1)
-    dX=[1,0];
+    dX=0;
 else
-    dX=[0,1];
+    dX=1;
 
 end
 

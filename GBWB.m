@@ -9,9 +9,9 @@ k=3/4;
 gamma=3;
 
 if (stoch==1)
-    dX=[1,-(a*Xt(2) + b*Xt(2)^2 + c*Xt(2)^3 + k) + gamma*Xt(3)*Xt(4),-Xt(3) - gamma*Xt(2)*Xt(4), -Xt(4)];
+    dX=[-(a*Xt(1) + b*Xt(1)^2 + c*Xt(1)^3 + k) + gamma*Xt(2)*Xt(3),-Xt(2) - gamma*Xt(1)*Xt(3), -Xt(3)];
 else
-    dX=[0,0,sqrt(2),sqrt(2)];
+    dX=[0,sqrt(2),sqrt(2)];
 end
 
 end
