@@ -1,3 +1,4 @@
+% behavioural test script for the GBWB system
 x = EulerMaruyama(@GBWB, [0,0.2,0,0], 10, 100000);
 figure
 subplot(2,2,1);
