@@ -7,9 +7,9 @@ d = size(ic,2);
 t0 = 0;
 tf = 10;
 Nt = 10000;
-NO = 50;
-Nens = 20;
-obsVar = 0.5;
+NO = 1;
+Nens = 50;
+obsVar = 0.2;
 
 dt = (tf-t0)/Nt;
 tSpace = linspace(t0,tf,Nt);
@@ -29,7 +29,7 @@ for ii=2:Nt
         X(ii,:,jj) = tmp(2,:);
     end
     if (mod(ii,NO)==0)
-        disp(ii/Nt);
+        %disp(ii/Nt);
 	Obs(ii,:) = trueSol(ii,:) + normrnd(0,sqrt(obsVar));
         mu = (1/Nens)*sum(X(ii,:,:),d);
         %A = reshape(X(ii,:,:),d,Nens)- mu';
