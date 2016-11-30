@@ -1,4 +1,4 @@
-function [Time, Soln] = SDESolver(deltaT, NumSol, tFin)
+function [Time, Soln] = SDESolver(deltaT, NumSol, tFin, InitialCond)
     
     % Six tunable parameters
     a = 6;
@@ -15,7 +15,7 @@ function [Time, Soln] = SDESolver(deltaT, NumSol, tFin)
     
     Soln = zeros([steps NumSol 3]); % Initialize Vector of solutions
     % Initialize at one equilibrium
-    Soln(1,:,:) = [1 0 0];
+    Soln(1,:,:) = InitialCond;
     
     % Only two variables are noisy.
     Noise = normrnd(0, sqrt(deltaT), [steps NumSol 2]); % Create noise increments
