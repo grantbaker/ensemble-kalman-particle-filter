@@ -9,9 +9,11 @@ ic = [0.2,0,0];
 t0 = 0;
 tf = 10;
 % number of time steps in solution
-Nt = 10000;
+Nt = 1000;
 % number of time steps between assimilations
 NO = 5;
+% number of fuzzy clusters for XEnKF
+Nl = 10;
 % ensemble members
 Nens = 20;
 % observation variance
@@ -22,25 +24,40 @@ d = size(ic,2);
 dt = (tf-t0)/Nt;
 tSpace = linspace(t0,tf,Nt);
 
+% fcm clustering method options
+fcmoptions = [2.0, 100, 1e-5, 0];
+
 % generate the true solution
 trueSol = EulerMaruyama(@GBWB,ic,tSpace);
+clear ic;
+
 % allocate memory
 X = zeros(Nt,d,Nens);
+Xl = zeros(Nt,d,Nens);
 Obs = zeros(NO,d);
 
 % give each ensemnble member a reasonable initial condition
 for ii=1:Nens
-    X(1,:,ii) = [normrnd(0,0.3),normrnd(0,0.3),normrnd(0,0.3)];
+    ictmp = [normrnd(0,0.3),normrnd(0,0.3),normrnd(0,0.3)];
+    % the ensemble members start out with the same ICs
+    X(1,:,ii) = ictmp;
+    Xl(1,:,ii) = ictmp;
 end
+clear ictmp;
 
-% begin propogating ensemble
+% begin propogating ensemble and updating
 for ii=2:Nt
     %disp(ii/Nt);
     % solve each ensemble member to the next time
     for jj=1:Nens
+        % propogation for EnKF ensemble
         tmp = EulerMaruyama(@GBWB,X(ii-1,:,jj),[tSpace(ii-1),tSpace(ii)]);
         X(ii,:,jj) = tmp(2,:);
+        % propogation for XEnKF ensemble
+        tmp = EulerMaruyama(@GBWB,Xl(ii-1,:,jj),[tSpace(ii-1),tSpace(ii)]);
+        Xl(ii,:,jj) = tmp(2,:);
     end
+    clear tmp;
     
     % if adequate number of steps has passed, assimilate
     if (mod(ii,NO)==0)
@@ -49,6 +66,7 @@ for ii=2:Nt
         % generate observation
 	    Obs(ii,:) = trueSol(ii,:) + normrnd(0,sqrt(obsVar));
         
+        % ---- ENKF UPDATE ----
         % compute the ensemble mean
         mu = (1/Nens)*sum(X(ii,:,:),d);
         
@@ -66,6 +84,34 @@ for ii=2:Nt
         % apply the Kalman filter update on each ensemble member
         for jj=1:Nens
             X(ii,:,jj) = (X(ii,:,jj)' + K*(Obs(ii)' - X(ii,:,jj)'))';
+        end
+        
+        % ---- XENKF UPDATE ----
+        
+        % applying the fuzzy c-means clustering method
+        [centers,psi] = fcm(reshape(Xl(ii,:,:),d,Nens)',Nl,fcmoptions);
+        
+        % compute alpha for each cluster
+        alpha = (1/Nens)*sum(psi,2);
+        
+        % compute tau for each cluster
+        tau = zeros(size(psi));
+        for jj=1:Nl
+            tau(jj,:) = (1/Nens)*psi(jj,:)*alpha(jj);
+        end
+        
+        % compute the mean and covariance
+        muX = zeros(d,Nl);
+        for jj=1:Nl
+            for k=1:Nens
+                muX(:,jj) = muX(:,jj) + tau(jj,k)*Xl(ii,:,jj)';
+            end
+        end
+        P = zeros(Nens,Nens,Nl);
+        for jj=1:Nl
+            for k=1:Nens
+                P(
+            end
         end
     end
 end
