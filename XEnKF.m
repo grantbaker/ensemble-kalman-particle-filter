@@ -10,13 +10,13 @@ ic = [0.2,0,0];
 t0 = 0;
 tf = 10;
 % number of time steps in solution
-Nt = 1000;
+Nt = 10000;
 % number of time steps between assimilations
-NO = 5;
+NO = 100;
 % number of fuzzy clusters for XEnKF
-Nl = 10;
+Nl = 15;
 % ensemble members
-Nens = 20;
+Nens = 50;
 % observation variance
 obsVar = 0.2;
 
@@ -26,7 +26,7 @@ dt = (tf-t0)/Nt;
 tSpace = linspace(t0,tf,Nt);
 
 % fcm clustering method options
-fcmoptions = [2.0, 100, 1e-5, 0];
+fcmoptions = [2.0, 1000, 1e-5, 0];
 
 % generate the true solution
 trueSol = EulerMaruyama(@GBWB,ic,tSpace);
@@ -57,8 +57,7 @@ for ii=2:Nt
         % propogation for XEnKF ensemble
         tmp = EulerMaruyama(@GBWB,Xl(ii-1,:,jj),[tSpace(ii-1),tSpace(ii)]);
         Xl(ii,:,jj) = tmp(2,:);
-    end
-    clear tmp;
+    en
     
     % if adequate number of steps has passed, assimilate
     if (mod(ii,NO)==0)
@@ -84,7 +83,7 @@ for ii=2:Nt
         
         % apply the Kalman filter update on each ensemble member
         for jj=1:Nens
-            X(ii,:,jj) = (X(ii,:,jj)' + K*(Obs(ii)' - X(ii,:,jj)'))';
+            X(ii,:,jj) = (X(ii,:,jj)' + K*(Obs(ii,:)' - X(ii,:,jj)'))';
         end
         
         % ---- XENKF UPDATE ----
@@ -118,11 +117,27 @@ for ii=2:Nt
         % compute the updated weights alphaU and normalize
         alphaU = zeros(size(alpha));
         for jj=1:Nl
-            alphaU(jj) = alpha(jj)*mvnpdf(Obs(ii,:)',muX(:,jj),(P(:,:,jj)+sqrt(obsVar)*eye(d)));
+            alphaU(jj) = alpha(jj)*mvnpdf(Obs(ii,:)',muX(:,jj),(P(:,:,jj)+(obsVar)*eye(d)));
         end
+        alphaU = alphaU/sum(alphaU);
+        
+        % generate index pairs
+        indices = zeros(Nens,2);
+        indices(:,1) = randsample(1:Nl,Nens,true,alphaU);
+        for jj=1:Nens
+            indices(jj,2) = randsample(1:Nens,1,true,tau(indices(jj,1),:)');
+        end
+        
+        % update ensemble
+        for jj=1:Nens
+            % compute kalman gain
+            K = P(:,:,indices(jj,1))*(P(:,:,indices(jj,1)) + obsVar*eye(d))^-1;
+            Xl(ii,:,jj) = (Xl(ii,:,indices(jj,2))' + K*(Obs(ii,:)' - Xl(ii,indices(jj,2))'))';
+        end
+        
     end
 end
 
 % plot the true solution and the ensemble mean at each time step
 % only plot x, since that's the only variable that we care about
-plot(tSpace,trueSol(:,1),tSpace,mean(X(:,1,:),3));
+plot(tSpace,trueSol(:,1),tSpace,mean(X(:,1,:),3),tSpace,mean(Xl(:,1,:),3));
