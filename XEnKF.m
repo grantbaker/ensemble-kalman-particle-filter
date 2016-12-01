@@ -1,6 +1,7 @@
-% Implementation of the Ensemble Kalman Filter for the
+% Implementation of the Mixture Ensemble Kalman Filter for the
 % GBWB system. Generates the true solution using
 % Euler-Maruyama, and tracks it with an ensemble kalman filter
+% as well as a mixture ensemble kalman filter
 
 % Parameters
 % initial condition
@@ -104,14 +105,20 @@ for ii=2:Nt
         muX = zeros(d,Nl);
         for jj=1:Nl
             for k=1:Nens
-                muX(:,jj) = muX(:,jj) + tau(jj,k)*Xl(ii,:,jj)';
+                muX(:,jj) = muX(:,jj) + tau(jj,k)*Xl(ii,:,k)';
             end
         end
-        P = zeros(Nens,Nens,Nl);
+        P = zeros(d,d,Nl);
         for jj=1:Nl
             for k=1:Nens
-                P(
+                P(:,:,jj) = P(:,:,jj) + tau(jj,k)*(Xl(ii,:,k)-muX(:,jj)')'*(Xl(ii,:,k)-muX(:,jj)');
             end
+        end
+        
+        % compute the updated weights alphaU and normalize
+        alphaU = zeros(size(alpha));
+        for jj=1:Nl
+            alphaU(jj) = alpha(jj)*mvnpdf(Obs(ii,:)',muX(:,jj),(P(:,:,jj)+sqrt(obsVar)*eye(d)));
         end
     end
 end
