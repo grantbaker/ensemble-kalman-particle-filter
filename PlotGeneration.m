@@ -1,6 +1,9 @@
-% Implementation of the Ensemble Kalman Filter for the
-% GBWB system. Generates the true solution using
-% Euler-Maruyama, and tracks it with an ensemble kalman filter
+% Script to generate all needed plots.
+% Plots include:
+% - gamma comparison
+% - Ensemble member comparison
+% - Observation frequency comparison
+
 
 % Parameters
 % initial condition

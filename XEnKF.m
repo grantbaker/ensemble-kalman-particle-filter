@@ -8,15 +8,15 @@
 ic = [0.2,0,0];
 % initial and final time
 t0 = 0;
-tf = 1;
+tf = 2;
 % number of time steps in solution
-Nt = 1000;
+Nt = 2000;
 % number of time steps between assimilations
-NO = 10;
+NO = 100;
 % number of fuzzy clusters for XEnKF
-Nl = 10;
+Nl = 200;
 % ensemble members
-Nens = 100;
+Nens = 1000;
 % observation variance
 obsVar = 0.2;
 
@@ -128,10 +128,13 @@ for ii=2:Nt
             indices(jj,2) = randsample(1:Nens,1,true,tau(indices(jj,1),:)');
         end
         
+        ESS = 1/sum(alphaU.^2)
         % update ensemble
         for jj=1:Nens
             % compute kalman gain
             Kx = P(:,:,indices(jj,1))*(P(:,:,indices(jj,1)) + obsVar*eye(d))^-1;
+            
+            % update
             Xl(ii,:,jj) = (Xl(ii,:,indices(jj,2))' + Kx*(Obs(ii,:)' + normrnd(0,sqrt(obsVar)) - Xl(ii,indices(jj,2))'))';
         end
         

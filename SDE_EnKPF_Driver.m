@@ -7,7 +7,7 @@ global H R gamma;
 gamma = 0.7;
 
 % Constants associated with the filter
-ensNum = 30;
+ensNum = 100;
 varNum = 3;
 
 % Set values for true solution
@@ -37,7 +37,7 @@ EnKPF = randn(varNum,ensNum);
 % Store the results
 EnKPF_store = zeros(varNum, ensNum, 200);
 
-for ii = 1:200
+for ii = 1:numObs
     disp(ii)
     % EnKPF
     % forecast ensemble
@@ -57,6 +57,6 @@ RMS_unobserved = sqrt(mean((XTObserved(1,:) - mean_EnKPF(1,:)).^2,1));
 
 figure
 hold on
-plot(mean_EnKPF(1,:))
+plot(linspace(0,tFin+deltaT,mean_EnKPF(1,:))
 plot(XTObserved(1,:))
 hold off
