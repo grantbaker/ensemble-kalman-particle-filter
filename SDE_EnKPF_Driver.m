@@ -18,7 +18,8 @@ gamma = 0.95;
 
 % Obtain trajoctory of system
     [T, XT] = SDESolver(deltaT, 1, tFin, InitialCond);
-    XT = XT(2:end,:)';T = T(2:end);
+    XT = XT(2:end,:)';
+    T = T(2:end);
 
     TObserved = T(:,1:stepsBetweenObs:end);
     XTObserved = XT(:,1:stepsBetweenObs:end);
