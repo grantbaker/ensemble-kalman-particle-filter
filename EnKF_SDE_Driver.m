@@ -10,6 +10,7 @@ varNum = 3;
     deltaT = 10^-4;
     tFin = 10 + deltaT; % adding extra deltaT since we don't want to observe system at time = 0
     numObs = 2000;
+    numberOfSteps = (tFin - deltaT)/deltaT;
     stepsBetweenObs = (tFin - deltaT)/(deltaT*numObs);
     InitialCond = randn(varNum,1);
 
@@ -29,7 +30,7 @@ varNum = 3;
     obs = H*XTObserved + sigma0*randn(size(H,1), numObs);
 
 % Store the results
-    EnKF_store = zeros(varNum, ensNum, numObs);
+    EnKF_store = zeros(varNum, ensNum, numberOfSteps);
     EnKF = bsxfun(@plus, XTObserved(:,1), randn(varNum, ensNum));
 
 for ii = 1:numObs
@@ -37,13 +38,15 @@ for ii = 1:numObs
     % EnKPF
     % forecast ensemble
     [~,sol] = SDESolver(deltaT, ensNum, stepsBetweenObs*deltaT, EnKF');
-    EnKF_store(:,:,ii) = squeeze(sol(end,:,:))';
+    EnKF_store(:,:,((ii-1)*stepsBetweenObs+1):(ii*stepsBetweenObs)) = ...
+                permute(sol(:,:,:), [3,2,1]);
+    EnKF = squeeze(sol(end,:,:))';
     
     % compute the ensemble mean
-    mu = (1/ensNum)*sum(EnKF_store(:,:,ii), 2);
+    mu = (1/ensNum)*sum(EnKF, 2);
     
     % compute the ensemble covariance
-    A = (bsxfun(@plus, EnKF_store(:,:,ii), - mu))/(ensNum-1);
+    A = (bsxfun(@plus, EnKF, - mu))/(ensNum-1);
     
     % compute the Kalman gain matrix
     K = (A*(H*A)')/((H*A*(H*A)') + R);
@@ -52,19 +55,20 @@ for ii = 1:numObs
     for jj=1:ensNum
         % Perturbation for y
         eps_y = normrnd(0,sigma0);
-        EnKF_store(:,jj,ii) = EnKF_store(:,jj,ii) + K*(obs(:,ii) + eps_y - ...
-                                H*EnKF_store(:,jj,ii));
+        EnKF(:,jj) = EnKF(:,jj) + K*(obs(:,ii) + eps_y - ...
+                                H*EnKF(:,jj));
     end
     
-    EnKF = EnKF_store(:,:,ii);
+    EnKF_store(:,:,ii*stepsBetweenObs) = EnKF;
 end
 
 mean_EnKF = squeeze(mean(EnKF_store,2));
-RMS = sqrt(mean((XTObserved-mean_EnKF).^2,1));
-RMS_unobserved = sqrt(mean((XTObserved(1,:) - mean_EnKF(1,:)).^2,1));
+RMS = sqrt(mean((XT - mean_EnKF).^2,1));
+RMS_unobserved = sqrt(mean((XT(1,:) - mean_EnKF(1,:)).^2,1));
 
 figure
 hold on
-plot(mean_EnKF(1,:))
-plot(XTObserved(1,:))
+plot(T, mean_EnKF(1,:))
+plot(T, XT(1,:))
+legend('EnKF', 'True')
 hold off
