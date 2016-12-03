@@ -4,71 +4,76 @@
 % - Ensemble member comparison
 % - Observation frequency comparison
 
-
 % Parameters
-% initial condition
-ic = [0.2,0,0];
 % initial and final time
 t0 = 0;
 tf = 10;
 % number of time steps in solution
 Nt = 10000;
-% number of time steps between assimilations
-NO = 2000;
+% number of observations
+Nobs = 200;
 % ensemble members
 Nens = 20;
 % observation variance
-obsVar = 0.3;
+obsVar = 0.2;
 
+% number of variables
+Nvar = 3;
+% initial condition
+InitialCond = randn(Nvar,1);
+% calculate time steps between observations
+stepsBetweenObs = floor(Nt/Nobs);
 % setting up dimension of system and solution space
-d = size(ic,2);
 dt = (tf-t0)/Nt;
 tSpace = linspace(t0,tf,Nt);
 
 % generate the true solution
-trueSol = EulerMaruyama(@GBWB,ic,tSpace);
-% allocate memory
-X = zeros(Nt,d,Nens);
-Obs = zeros(NO,d);
+[T,trueSolution] = SDESolver(dt,1,tf,InitialCond);
 
-% give each ensemnble member a reasonable initial condition
-for ii=1:Nens
-    X(1,:,ii) = [normrnd(0,0.3),normrnd(0,0.3),normrnd(0,0.3)];
-end
+% generate observations
+XTObserved = XT(:,1:stepsBetweenObs:end);
+tmp = eye(varNum);
+H = tmp(2:3,:);
+%H = tmp;
+R = obsVar*eye(size(H,1));
+Observations = H*XTObserved + obsVar*randn(size(H,1),200);
+
+
+% give each ensemble member a reasonable initial condition
+EnKPF = bsxfun(@plus,InitialCond,0.3*randn(Nvar,Nens));
+
+% solution tracking memory allocation
+EnKPF_solution = zeros(Nt,Nvar,Nens);
 
 % begin propogating ensemble
-for ii=2:Nt
+for ii=1:Nobs
     %disp(ii/Nt);
     % solve each ensemble member to the next time
-    for jj=1:Nens
-        tmp = EulerMaruyama(@GBWB,X(ii-1,:,jj),[tSpace(ii-1),tSpace(ii)]);
-        X(ii,:,jj) = tmp(2,:);
-    end
     
     % if adequate number of steps has passed, assimilate
-    if (mod(ii,NO)==0)
+    if (mod(ii,Nobs)==0)
         disp(ii/Nt);
         
         % generate observation
-	    Obs(ii,:) = trueSol(ii,:) + normrnd(0,sqrt(obsVar));
+	    Observations(ii,:) = trueSol(ii,:) + normrnd(0,sqrt(obsVar));
         
         % compute the ensemble mean
-        mu = (1/Nens)*sum(X(ii,:,:),d);
+        mu = (1/Nens)*sum(X(ii,:,:),Nvar);
         
         % compute the ensemble covariance
         %A = reshape(X(ii,:,:),d,Nens)- mu';
-        A = reshape(X(ii,:,:),d,Nens);
+        A = reshape(X(ii,:,:),Nvar,Nens);
         for jj=1:Nens
             A(:,jj) = A(:,jj)-mu';
         end
         C = (A*A')/(Nens-1);
         
         % compute the Kalman gain matrix
-        K = C * (C + obsVar*eye(d))^-1;
+        K = C * (C + obsVar*eye(Nvar))^-1;
         
         % apply the Kalman filter update on each ensemble member
         for jj=1:Nens
-            X(ii,:,jj) = (X(ii,:,jj)' + K*(Obs(ii)' - X(ii,:,jj)'))';
+            X(ii,:,jj) = (X(ii,:,jj)' + K*(Observations(ii)' - X(ii,:,jj)'))';
         end
     end
 end
