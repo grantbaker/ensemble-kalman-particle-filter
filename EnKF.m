@@ -11,9 +11,9 @@ tf = 10;
 % number of time steps in solution
 Nt = 10000;
 % number of time steps between assimilations
-NO = 2000;
+NO = 5000;
 % ensemble members
-Nens = 20;
+Nens = 200;
 % observation variance
 obsVar = 0.3;
 

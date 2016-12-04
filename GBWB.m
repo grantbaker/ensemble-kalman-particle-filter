@@ -3,11 +3,11 @@ function [ dX ] = GBWB(Xt,stoch)
 %   more stuff
 
 % proposed parameters
-a=-6;
-b=-3/4;
-c=6;
-k=3/4;
-gamma=1;
+%a=-6;
+%b=-3/4;
+%c=6;
+%k=3/4;
+%gamma=1;
 
 % true parameters
 a=6;
