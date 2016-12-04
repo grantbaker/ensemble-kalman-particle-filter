@@ -48,7 +48,7 @@ for ii = 1:200
     end
     wPF = wPF/sum(wPF);
     wPF_store(:,((ii-1)*stepsBetweenObs+1):(ii*stepsBetweenObs)) = ...
-                    repmat(wPF,500,1)';
+                    repmat(wPF,stepsBetweenObs,1)';
 
     % Resample
     NN = randsample(NP,NP,true,wPF);
