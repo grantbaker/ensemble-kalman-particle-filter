@@ -25,9 +25,10 @@ wPF = zeros(Nens,Nt);
 
 % give each ensemble member a reasonable initial condition
 EnKPF(:,:,1) = bsxfun(@plus,InitialCond,0.3*randn(Nvar,Nens));
-EnKPFw(:,1) = repmat(1/Nens,Nens,1);
+EnKPFw(:,1:steps) = repmat(1/Nens,Nens,steps);
 EnKF(:,:,1) = bsxfun(@plus,InitialCond,0.3*randn(Nvar,Nens));
 vPF(:,:,1) = bsxfun(@plus,InitialCond,0.3*randn(Nvar,Nens));
+wPF(:,1:steps) = repmat(1/Nens,Nens,steps);
 
 % EnKPF_standard
 for ii=1:Nobs
@@ -43,7 +44,7 @@ for ii=1:Nobs
     % analysis update
     [update,alpha] = EnKPF_update(EnKPF(:,:,ii*steps), Observations(:,ii), Nvar, Nens);
     EnKPF(:,:,ii*steps) = update;
-    EnKPFw(:,(ii*steps):((ii+1)*steps) = alpha';
+    EnKPFw(:,(ii*steps):((ii+1)*steps-1)) = repmat(alpha,1,steps);
     
     if (ii~=Nobs)
         [~,sol] = SDESolver(dt, Nens, dt, EnKPF(:,:,ii*steps)');
@@ -99,14 +100,14 @@ for ii = 1:Nobs
                 permute(sol(:,:,:), [3,2,1]);
     
     for jj = 1:Nens
-        wPF(jj) = exp(-.5*(norm(Observations(:,ii) - H*vPF(:,jj,ii*steps),2)/sigma0)^2);
+        wPF(jj,ii*steps) = exp(-.5*(norm(Observations(:,ii) - H*vPF(:,jj,(ii*steps-1)),2)/sigma0)^2);
     end
     
-    wPF = wPF/sum(wPF);
+    wPF(:,(ii*steps):((ii+1)*steps-1)) = repmat(wPF(:,ii*steps)/sum(wPF(:,ii*steps)),1,steps);
     %wPF(:,((ii-1)*steps+1):(ii*steps)) = repmat(wPF(:,ii),steps,1)';
 
     % Resample
-    NN = randsample(Nens,Nens,true,wPF);
+    NN = randsample(Nens,Nens,true,wPF(:,ii*steps));
     vPF(:,:,ii*steps) = vPF(:,NN,ii*steps);
     
     if (ii~=Nobs)
@@ -120,22 +121,25 @@ end
 
 tSpace = linspace(t0,tf,Nt);
 
+mean_EnKPF = permute(squeeze(sum(bsxfun(@times, permute(EnKPF, [2,3,1]), EnKPFw(:,1:Nt)),1)),[2,1]);
+mean_PF = permute(squeeze(sum(bsxfun(@times, permute(vPF, [2,3,1]), wPF(:,1:Nt)),1)),[2,1]);
+
 figure;
 set(0,'defaultaxesfontname','courier');
 set(0,'defaulttextinterpreter','latex');
 set(0, 'defaultLegendInterpreter','latex')
-p=plot(tSpace,permute(mean(EnKPF(1,:,1:end),2),[3,2,1]),...
+p=plot(tSpace,mean_EnKPF(1,:,:),...
     tSpace,permute(mean(EnKF(1,:,1:end),2),[3,2,1]),...
-    tSpace,permute(mean(vPF(1,:,1:end),2),[3,2,1]),...
+    tSpace,mean_PF(1,:,:),...
     tSpace,TrueSolution(1,:));
 p(4).LineWidth = 2;
 legend('EnKPF','EnKF','PF','True')
 %set(a,'TickLabelInterpreter', 'latex');
 title(t)
 
-RMS_EnKPF = sqrt(mean((squeeze(mean(EnKPF,2))-TrueSolution).^2));
+RMS_EnKPF = sqrt(mean((mean_EnKPF-TrueSolution).^2));
 RMS_EnKF = sqrt(mean((squeeze(mean(EnKF,2))-TrueSolution).^2));
-RMS_PF = sqrt(mean((squeeze(mean(vPF,2))-TrueSolution).^2));
+RMS_PF = sqrt(mean((mean_PF-TrueSolution).^2));
 
 figure;
 set(0,'defaultaxesfontname','courier');
@@ -149,4 +153,3 @@ title(t)
 
 
 end
-

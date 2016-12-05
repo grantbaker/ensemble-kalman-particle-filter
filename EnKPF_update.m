@@ -12,7 +12,7 @@
 %
 % Output: the ensemble update update (this is varNum x ensNum)
 %
-function update = EnKPF_update(fore, obs, varNum, ensNum)
+function [update, alpha] = EnKPF_update(fore, obs, varNum, ensNum)
 
     global gamma H R;
                             
@@ -71,5 +71,8 @@ function update = EnKPF_update(fore, obs, varNum, ensNum)
         update(:,ii) = x_gam + KalGain2*(obs + (err_2/sqrt(1-gamma)) - ...
                         H*x_gam);
     end
+    
+    alpha = alpha(Indicies);
+    alpha = alpha/sum(alpha);
 
 end

@@ -13,7 +13,7 @@ tf = 10;
 % number of time steps in solution
 Nt = 10000;
 % observation variance
-sigma0 = sqrt(.01);
+sigma0 = sqrt(.1);
 
 % number of variables
 Nvar = 3;

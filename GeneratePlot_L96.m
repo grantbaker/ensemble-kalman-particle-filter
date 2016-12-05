@@ -39,8 +39,7 @@ for ii=1:Nobs
     end
     
     % analysis update
-    EnKPF(:,:,ii*steps) = ...
-        EnKPF_update(EnKPF(:,:,ii*steps), Observations(:,ii), Nvar, Nens);
+    EnKPF(:,:,ii*steps) = EnKPF_update(EnKPF(:,:,ii*steps), Observations(:,ii), Nvar, Nens);
     
     if (ii~=Nobs)
         for k=1:Nens
