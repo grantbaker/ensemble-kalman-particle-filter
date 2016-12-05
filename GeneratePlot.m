@@ -1,4 +1,4 @@
-function GeneratePlot(TrueSolution, Nobs, Nens, gamma_, H_)
+function GeneratePlot(TrueSolution, Nobs, Nens, gamma_, H_, t)
 %GENERATEPLOT Filters using all three filtering methods, given the desired
 %parameters. Generates a plot of the result.
 
@@ -117,12 +117,33 @@ end
 
 tSpace = linspace(t0,tf,Nt);
 
-figure
-plot(tSpace,TrueSolution(1,:),...
-    tSpace,permute(mean(EnKPF(1,:,1:end),2),[3,2,1]),...
+figure;
+set(0,'defaultaxesfontname','courier');
+set(0,'defaulttextinterpreter','latex');
+set(0, 'defaultLegendInterpreter','latex')
+p=plot(tSpace,permute(mean(EnKPF(1,:,1:end),2),[3,2,1]),...
     tSpace,permute(mean(EnKF(1,:,1:end),2),[3,2,1]),...
-    tSpace,permute(mean(vPF(1,:,1:end),2),[3,2,1]));
-legend('True','EnKPF','EnKF','PF')
+    tSpace,permute(mean(vPF(1,:,1:end),2),[3,2,1]),...
+    tSpace,TrueSolution(1,:));
+p(4).LineWidth = 2;
+legend('EnKPF','EnKF','PF','True')
+%set(a,'TickLabelInterpreter', 'latex');
+title(t)
+
+RMS_EnKPF = sqrt(mean((squeeze(mean(EnKPF,2))-TrueSolution).^2));
+RMS_EnKF = sqrt(mean((squeeze(mean(EnKF,2))-TrueSolution).^2));
+RMS_PF = sqrt(mean((squeeze(mean(vPF,2))-TrueSolution).^2));
+
+figure;
+set(0,'defaultaxesfontname','courier');
+set(0,'defaulttextinterpreter','latex');
+set(0, 'defaultLegendInterpreter','latex')
+p=plot(tSpace,RMS_EnKPF,...
+    tSpace,RMS_EnKF,...
+    tSpace,RMS_PF);
+legend('EnKPF','EnKF','PF')
+title(t)
+
 
 end
 

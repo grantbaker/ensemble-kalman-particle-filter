@@ -13,7 +13,7 @@ tf = 10;
 % number of time steps in solution
 Nt = 10000;
 % observation variance
-sigma0 = sqrt(.2);
+sigma0 = sqrt(.01);
 
 % number of variables
 Nvar = 3;
@@ -33,5 +33,28 @@ dt = (tf-t0)/Nt;
 %T = T(2:end);
 TrueSolution = permute(XT,[3,1,2]);
 
-GeneratePlot(TrueSolution, 500, 200, 0.5, H1)
-GeneratePlot(TrueSolution, 500, 200, 0.5, H2)
+GeneratePlot(TrueSolution, 200, 30, 0.5, H1, 'Standard')
+GeneratePlot(TrueSolution, 200, 30, 0.5, H1, 'Standard')
+GeneratePlot(TrueSolution, 200, 30, 0.5, H2, 'Observe $x$')
+GeneratePlot(TrueSolution, 200, 30, 0.5, H2, 'Observe $x$')
+
+GeneratePlot(TrueSolution, 200, 30, 0.05, H1, '$\gamma = 0.05$')
+GeneratePlot(TrueSolution, 200, 30, 0.05, H1, '$\gamma = 0.05$')
+GeneratePlot(TrueSolution, 200, 30, 0.3, H1, '$\gamma = 0.3$')
+GeneratePlot(TrueSolution, 200, 30, 0.3, H1, '$\gamma = 0.3$')
+GeneratePlot(TrueSolution, 200, 30, 0.7, H1, '$\gamma = 0.7$')
+GeneratePlot(TrueSolution, 200, 30, 0.7, H1, '$\gamma = 0.7$')
+GeneratePlot(TrueSolution, 200, 30, 0.95, H1, '$\gamma = 0.95$')
+GeneratePlot(TrueSolution, 200, 30, 0.95, H1, '$\gamma = 0.95$')
+
+GeneratePlot(TrueSolution, 20, 30, 0.5, H1, '20 Observations')
+GeneratePlot(TrueSolution, 20, 30, 0.5, H1, '20 Observations')
+GeneratePlot(TrueSolution, 2000, 30, 0.5, H1, '2000 Observations')
+GeneratePlot(TrueSolution, 2000, 30, 0.5, H1, '2000 Observations')
+
+GeneratePlot(TrueSolution, 200, 10, 0.5, H1, '10 Ensemble Members')
+GeneratePlot(TrueSolution, 200, 10, 0.5, H1, '10 Ensemble Members')
+GeneratePlot(TrueSolution, 200, 100, 0.5, H1, '100 Ensemble Members')
+GeneratePlot(TrueSolution, 200, 100, 0.5, H1, '100 Ensemble Members')
+GeneratePlot(TrueSolution, 200, 500, 0.5, H1, '500 Ensemble Members')
+GeneratePlot(TrueSolution, 200, 500, 0.5, H1, '500 Ensemble Members')
