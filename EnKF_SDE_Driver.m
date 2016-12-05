@@ -46,7 +46,7 @@ for ii = 1:numObs
     mu = (1/ensNum)*sum(EnKF, 2);
     
     % compute the ensemble covariance
-    A = (bsxfun(@plus, EnKF, - mu))/(ensNum-1);
+    A = (bsxfun(@plus, EnKF, -mu))/(ensNum-1);
     
     % compute the Kalman gain matrix
     K = (A*(H*A)')/((H*A*(H*A)') + R);
