@@ -18,12 +18,14 @@ Observations = H*XTObserved + sigma0*randn(size(H,1),Nobs);
 
 % solution tracking memory allocation
 EnKPF = zeros(Nvar,Nens,Nt);
+EnKPFw = zeros(Nens,Nt);
 EnKF = zeros(Nvar,Nens,Nt);
-wPF = zeros(Nens,1);
 vPF = zeros(Nvar, Nens, Nt);
+wPF = zeros(Nens,Nt);
 
 % give each ensemble member a reasonable initial condition
 EnKPF(:,:,1) = bsxfun(@plus,InitialCond,0.3*randn(Nvar,Nens));
+EnKPFw(:,1) = repmat(1/Nens,Nens,1);
 EnKF(:,:,1) = bsxfun(@plus,InitialCond,0.3*randn(Nvar,Nens));
 vPF(:,:,1) = bsxfun(@plus,InitialCond,0.3*randn(Nvar,Nens));
 
@@ -39,8 +41,9 @@ for ii=1:Nobs
                 permute(sol, [3,2,1]);
     
     % analysis update
-    EnKPF(:,:,ii*steps) = ...
-        EnKPF_update(EnKPF(:,:,ii*steps), Observations(:,ii), Nvar, Nens);
+    [update,alpha] = EnKPF_update(EnKPF(:,:,ii*steps), Observations(:,ii), Nvar, Nens);
+    EnKPF(:,:,ii*steps) = update;
+    EnKPFw(:,(ii*steps):((ii+1)*steps) = alpha';
     
     if (ii~=Nobs)
         [~,sol] = SDESolver(dt, Nens, dt, EnKPF(:,:,ii*steps)');

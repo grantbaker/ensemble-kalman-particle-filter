@@ -19,7 +19,7 @@ sigma0 = sqrt(.2);
 Nvar = 40;
 % observation matrix
 tmp = eye(Nvar);
-H1 = tmp(2:2:end,:);
+H1 = tmp(1:1:end,:);
 
 % initial condition
 InitialCond = randn(Nvar,1);
@@ -32,4 +32,5 @@ dt = (tf-t0)/Nt;
 %T = T(2:end);
 TrueSolution = permute(XT,[2,1]);
 
-GeneratePlot_L96(TrueSolution, 500, 100, 0.5, H1, 'Standard')
+% GeneratePlot_L96(TrueSolution, Nobs, Nens, gamma, H, title)
+GeneratePlot_L96(TrueSolution, 500, 300, 0.7, H1, 'Standard')
