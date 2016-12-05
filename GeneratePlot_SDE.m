@@ -1,5 +1,5 @@
-function GeneratePlot(TrueSolution, Nobs, Nens, gamma_, H_, t)
-%GENERATEPLOT Filters using all three filtering methods, given the desired
+function GeneratePlot_SDE(TrueSolution, Nobs, Nens, gamma_, H_, t)
+%GENERATEPLOT_SDE Filters using all three filtering methods, given the desired
 %parameters. Generates a plot of the result.
 
 global H R gamma Nvar Nt InitialCond sigma0 t0 tf dt;
