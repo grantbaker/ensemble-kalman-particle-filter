@@ -36,6 +36,7 @@ gamma = 0.7;
     EnKPF_store = zeros(varNum, ensNum, totalTimeSteps);
     
 % Initialize ensemble for EnKF
+    wieghts = zeros(ensNum, totalTimeSteps);
     EnKF = randn(varNum,ensNum);
     % Store the results
     EnKF_store = zeros(varNum, ensNum, totalTimeSteps);
@@ -59,10 +60,12 @@ for ii = 1:numObs
     end
     
     % EnKPF update
-    update = EnKPF_update(EnKPF, obs(:,ii), varNum, ensNum);
+    [update, alpha] = EnKPF_update(EnKPF, obs(:,ii), varNum, ensNum);
                         
     EnKPF = update;
     EnKPF_store(:,:,ii*stepsBetweenObs) = EnKPF;
+    wieghts(:,((ii-1)*stepsBetweenObs+1):ii*stepsBetweenObs) = ...
+                repmat(alpha, 1, stepsBetweenObs);
     
     % EnKF Update
     % compute the ensemble mean
@@ -89,7 +92,9 @@ end
 mean_EnKF = squeeze(mean(EnKF_store,2));
 RMS_EnKF = sqrt(mean((XT - mean_EnKF).^2,1));
 
-mean_EnKPF = squeeze(mean(EnKPF_store,2));
+
+mean_EnKPF = squeeze(sum(bsxfun(@times, permute(EnKPF_store, [2,3,1]), ...
+                wieghts),1))';
 RMS_EnKPF = sqrt(mean((XT - mean_EnKPF).^2,1));
 
 figure
