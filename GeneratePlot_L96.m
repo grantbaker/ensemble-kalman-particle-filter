@@ -18,14 +18,17 @@ Observations = H*XTObserved + sigma0*randn(size(H,1),Nobs);
 
 % solution tracking memory allocation
 EnKPF = zeros(Nvar,Nens,Nt);
+EnKPFw = zeros(Nens,Nt);
 EnKF = zeros(Nvar,Nens,Nt);
-wPF = zeros(Nens,1);
+wPF = zeros(Nens,Nt);
 vPF = zeros(Nvar, Nens, Nt);
 
 % give each ensemble member a reasonable initial condition
 EnKPF(:,:,1) = bsxfun(@plus,InitialCond,0.3*randn(Nvar,Nens));
+EnKPFw(:,1:steps) = repmat(1/Nens,Nens,steps);
 EnKF(:,:,1) = bsxfun(@plus,InitialCond,0.3*randn(Nvar,Nens));
-vPF(:,:,1) = bsxfun(@plus,InitialCond,0.3*randn(Nvar,Nens));
+%vPF(:,:,1) = bsxfun(@plus,InitialCond,0.3*randn(Nvar,Nens));
+%wPF(:,1:steps) = repmat(1/Nens,Nens,steps);
 
 % EnKPF_standard
 for ii=1:Nobs
@@ -39,7 +42,9 @@ for ii=1:Nobs
     end
     
     % analysis update
-    EnKPF(:,:,ii*steps) = EnKPF_update(EnKPF(:,:,ii*steps), Observations(:,ii), Nvar, Nens);
+    [update,alpha] = EnKPF_update(EnKPF(:,:,ii*steps), Observations(:,ii), Nvar, Nens);
+    EnKPF(:,:,ii*steps) = update;
+    EnKPFw(:,(ii*steps):((ii+1)*steps-1)) = repmat(alpha,1,steps);
     
     if (ii~=Nobs)
         for k=1:Nens
@@ -121,6 +126,7 @@ end
 
 % plot the true solution and the ensemble mean at each time step
 % only plot x, since that's the only variable that we care about
+mean_EnKPF = permute(squeeze(sum(bsxfun(@times, permute(EnKPF, [2,3,1]), EnKPFw(:,1:Nt)),1)),[2,1]);
 
 tSpace = linspace(t0,tf,Nt);
 
@@ -137,19 +143,24 @@ tSpace = linspace(t0,tf,Nt);
 % %set(a,'TickLabelInterpreter', 'latex');
 % title(t)
 
-RMS_EnKPF = sqrt(mean((squeeze(mean(EnKPF,2))-TrueSolution).^2));
+RMS_EnKPF = sqrt(mean((mean_EnKPF-TrueSolution).^2));
 RMS_EnKF = sqrt(mean((squeeze(mean(EnKF,2))-TrueSolution).^2));
-RMS_PF = sqrt(mean((squeeze(mean(vPF,2))-TrueSolution).^2));
 
+RMS_EnKPF_mean = mean(RMS_EnKPF);
+RMS_EnKF_mean = mean(RMS_EnKF);
+
+%RMS_PF = sqrt(mean((squeeze(mean(vPF,2))-TrueSolution).^2));
+%tSpace,RMS_PF
 figure;
 set(0,'defaultaxesfontname','courier');
 set(0,'defaulttextinterpreter','latex');
 set(0, 'defaultLegendInterpreter','latex')
 p=plot(tSpace,RMS_EnKPF,...
-    tSpace,RMS_EnKF,...
-    tSpace,RMS_PF);
-legend('EnKPF','EnKF','PF')
-title(t)
+    tSpace,RMS_EnKF);
+leg = legend(['EnKPF; RMS = ',num2str(RMS_EnKPF_mean)],['EnKF; RMS = ',num2str(RMS_EnKF_mean)]);
+legtxt = findobj(leg, 'type', 'text');
+set(legtxt,'FontSize',18)
+title(t,'FontSize',18)
 
 
 end

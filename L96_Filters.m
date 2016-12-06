@@ -7,8 +7,8 @@ global H R gamma;
 gamma = 0.7;
 
 % Constants associated with the filter
-    ensNum = 100;
-    varNum = 5;
+    ensNum = 600;
+    varNum = 40;
     totalTimeSteps = 5000;
     numObs = 200; %Needs to evenly divide totalTimeSteps
     stepsBetweenObs = totalTimeSteps/numObs;
@@ -92,14 +92,16 @@ end
 mean_EnKF = squeeze(mean(EnKF_store,2));
 RMS_EnKF = sqrt(mean((XT - mean_EnKF).^2,1));
 
-
 mean_EnKPF = squeeze(sum(bsxfun(@times, permute(EnKPF_store, [2,3,1]), ...
                 wieghts),1))';
 RMS_EnKPF = sqrt(mean((XT - mean_EnKPF).^2,1));
 
+RMS_EnKPF_overall = mean(RMS_EnKPF);
+RMS_EnKF_overall = mean(RMS_EnKF);
+
 figure
 hold on
-plot(T, RMS_EnKF)
 plot(T, RMS_EnKPF)
-legend('RMS EnKF', 'RMS EnKPF')
+plot(T, RMS_EnKF)
+legend(['EnKPF; RMS = ',num2str(RMS_EnKPF_overall)],['EnKF; RMS = ',num2str(RMS_EnKF_overall)])
 hold off

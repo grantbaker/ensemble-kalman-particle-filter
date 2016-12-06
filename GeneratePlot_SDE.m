@@ -132,7 +132,10 @@ p=plot(tSpace,mean_EnKPF(1,:,:),...
     tSpace,permute(mean(EnKF(1,:,1:end),2),[3,2,1]),...
     tSpace,mean_PF(1,:,:),...
     tSpace,TrueSolution(1,:));
-p(4).LineWidth = 2;
+p(1).LineWidth = 1.5;
+p(2).LineWidth = 1.5;
+p(3).LineWidth = 1.5;
+p(4).LineWidth = 3;
 legend('EnKPF','EnKF','PF','True')
 %set(a,'TickLabelInterpreter', 'latex');
 title(t)
@@ -141,6 +144,10 @@ RMS_EnKPF = sqrt(mean((mean_EnKPF-TrueSolution).^2));
 RMS_EnKF = sqrt(mean((squeeze(mean(EnKF,2))-TrueSolution).^2));
 RMS_PF = sqrt(mean((mean_PF-TrueSolution).^2));
 
+RMS_EnKPF_mean = mean(RMS_EnKPF);
+RMS_EnKF_mean = mean(RMS_EnKF);
+RMS_PF_mean = mean(RMS_PF);
+
 figure;
 set(0,'defaultaxesfontname','courier');
 set(0,'defaulttextinterpreter','latex');
@@ -148,7 +155,7 @@ set(0, 'defaultLegendInterpreter','latex')
 p=plot(tSpace,RMS_EnKPF,...
     tSpace,RMS_EnKF,...
     tSpace,RMS_PF);
-legend('EnKPF','EnKF','PF')
+legend(['EnKPF; RMS = ',num2str(RMS_EnKPF_mean)],['EnKF; RMS = ',num2str(RMS_EnKF_mean)],['PF; RMS = ',num2str(RMS_PF_mean)])
 title(t)
 
 
